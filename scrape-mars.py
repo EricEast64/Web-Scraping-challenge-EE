@@ -2,6 +2,7 @@
 from splinter import Browser
 from bs4 import BeautifulSoup as soup
 from webdriver_manager.chrome import ChromeDriverManager
+import datetime as dt
 
 # scrape all function 
 def scrape_all():
@@ -16,7 +17,9 @@ def scrape_all():
         "newsTitle": news_title,
         "newsParagraph": news_body,
         "featuredImage": scrape_image(browser),
-        "facts": scrape_facts(browser)
+        "facts": scrape_facts(browser),
+        "hemispheres": scrape_hemispheres(browser),
+        "lastUpdated": dt.datetime.now()
     }
 
     # stop web driver
@@ -76,16 +79,16 @@ def scrape_facts(browser):
 
     #parse the html with soup
     html = browser.html
-    facts_soup = soup(html, 'html.parser')
+    fact_soup = soup(html, 'html.parser')
 
     # find the facts location
-    factsLocation = facts_soup.find('div', class_='diagram mt-4')
+    factsLocation = fact_soup.find('div', class_='diagram mt-4')
     
     # grab the html for the fact table
     factTable = factsLocation.find('table')
 
     # create empty string
-    facts == ""
+    facts = ""
 
     # add the facts to the empty string
     facts += str(factTable)
@@ -93,6 +96,35 @@ def scrape_facts(browser):
     return facts
 
 # scrape through hemispheres page
+def scrape_hemispheres(browser):
+    # visit url
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+
+    # Create a list to hold the images and titles
+    hemisphere_img_urls = []
+
+    # loop through the links, click each, find the sample anchor, return the href
+    for i in range(4):
+        hemisphereInfo = {}
+    
+        # find the elements on each loop
+        browser.find_by_css('a.product-item img')[i].click()
+    
+        # Find the sample image anchor tag and extract the href
+        sample = browser.links.find_by_text('Sample').first
+        hemisphereInfo['img_url'] = sample['href']
+    
+        # Get the hemisphere title
+        hemisphereInfo['title'] = browser.find_by_css('h2.title').text
+    
+        # Append the hemisphere title to list
+        hemisphere_img_urls.append(hemisphereInfo)
+    
+        # Navigate back
+        browser.back()
+
+    return hemisphere_img_urls
 
 
 # set up as a flask app
