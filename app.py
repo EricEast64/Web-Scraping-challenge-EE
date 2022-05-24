@@ -4,6 +4,10 @@ import scrape_mars
 
 app = Flask(__name__)
 
+# use flask pymongo to set up the connection to the database
+app.config ["MONGO_URI"] = "mongodb://localhost:27017/mars_data_db"
+mongo = PyMongo(app)
+
 @app.route("/")
 def index():
     return "You reached the index"
